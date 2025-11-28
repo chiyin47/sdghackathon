@@ -41,7 +41,7 @@ public class AIModelService {
             "contents": [{"parts": [{"text": "%s"}]}],
             "generationConfig": {
                 "temperature": 0.7,
-                "maxOutputTokens": 256
+                "maxOutputTokens": 512
             }
           }
           """.formatted(userMessage);
