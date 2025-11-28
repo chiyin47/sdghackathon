@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import MapComponent from './MapComponent';
 import AutocompleteInput from './AutocompleteInput';
+import EnvironmentalImpactDisplay from './EnvironmentalImpactDisplay'; // Import the new component
 
 function GreenRouteDemo() {
   const [origin, setOrigin] = useState('');
@@ -9,6 +10,8 @@ function GreenRouteDemo() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [mapCenterLatitude, setMapCenterLatitude] = useState(34.0522); // Default to a central point
+  const [mapCenterLongitude, setMapCenterLongitude] = useState(-118.2437); // Default to a central point
 
   const handleStopChange = (index, value) => {
     const newStops = [...stops];
@@ -62,6 +65,11 @@ function GreenRouteDemo() {
       .finally(() => setLoading(false));
   };
 
+  const handleMapMove = (lat, lng) => {
+    setMapCenterLatitude(lat);
+    setMapCenterLongitude(lng);
+  };
+
   return (
     <div style={{ padding: '20px' }}>
       <h2>Green Route Demo</h2>
@@ -104,7 +112,7 @@ function GreenRouteDemo() {
       {error && <div style={{ color: 'red', marginTop: '10px' }}>{error}</div>}
 
       <div style={{ height: '500px', width: '100%', marginTop: '20px' }}>
-        <MapComponent route={result} />
+        <MapComponent route={result} onMapMove={handleMapMove} />
       </div>
 
       {result && (
@@ -116,6 +124,13 @@ function GreenRouteDemo() {
           <p><strong>Fuel Used:</strong> {result.fuelUsed}</p>
         </div>
       )}
+
+      <EnvironmentalImpactDisplay
+        latitude={mapCenterLatitude}
+        longitude={mapCenterLongitude}
+        distance={result ? result.distance : 0} // Use actual distance from result
+        transportationMode={"car"} // Placeholder, ideally this would be user selected or derived
+      />
     </div>
   );
 }
