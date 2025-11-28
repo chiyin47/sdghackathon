@@ -17,9 +17,14 @@ public class RouteController {
     private DirectionsService directionsService;
 
     @GetMapping
-    public RouteResponse getRoute(@RequestParam String origin, @RequestParam String destination) {
+    public RouteResponse getRoute(
+            @RequestParam String origin,
+            @RequestParam String destination,
+            @RequestParam(required = false) String waypoints
+    ) {
         try {
-            DirectionsResult directions = directionsService.getDirections(origin, destination);
+            String[] waypointArray = (waypoints != null && !waypoints.isEmpty()) ? waypoints.split("\\|") : new String[0];
+            DirectionsResult directions = directionsService.getDirections(origin, destination, waypointArray);
 
             if (directions.routes.length == 0) {
                 RouteResponse error = new RouteResponse();
@@ -31,16 +36,29 @@ public class RouteController {
             List<RouteResponse.LatLng> coords = new ArrayList<>();
             for (DirectionsLeg leg : route.legs) {
                 for (DirectionsStep step : leg.steps) {
-                    coords.add(new RouteResponse.LatLng(step.startLocation.lat, step.startLocation.lng));
+                    List<com.google.maps.model.LatLng> path = step.polyline.decodePath();
+                    for (com.google.maps.model.LatLng point : path) {
+                        coords.add(new RouteResponse.LatLng(point.lat, point.lng));
+                    }
                 }
-                coords.add(new RouteResponse.LatLng(leg.endLocation.lat, leg.endLocation.lng));
             }
+
+            long totalDistance = 0;
+            long totalDuration = 0;
+            for (DirectionsLeg leg : route.legs) {
+                totalDistance += leg.distance.inMeters;
+                totalDuration += leg.duration.inSeconds;
+            }
+
+            long hours = totalDuration / 3600;
+            long minutes = (totalDuration % 3600) / 60;
+            String readableDuration = String.format("%d hours %d mins", hours, minutes);
 
             RouteResponse response = new RouteResponse();
             response.setContent("Route via " + route.summary);
-            response.setDistance(route.legs[0].distance.humanReadable);
-            response.setDuration(route.legs[0].duration.humanReadable);
-            response.setFuelUsed("Estimated fuel: " + Math.round(route.legs[0].distance.inMeters / 1000 * 0.07) + " L");
+            response.setDistance(String.format("%.2f km", totalDistance / 1000.0));
+            response.setDuration(readableDuration);
+            response.setFuelUsed("Estimated fuel: " + Math.round(totalDistance / 1000 * 0.07) + " L");
             response.setCoordinates(coords);
 
             return response;

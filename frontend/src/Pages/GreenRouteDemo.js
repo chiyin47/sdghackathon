@@ -4,16 +4,44 @@ import MapComponent from './MapComponent';
 function GreenRouteDemo() {
   const [origin, setOrigin] = useState('');
   const [destination, setDestination] = useState('');
+  const [stops, setStops] = useState(['']);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const handleStopChange = (index, value) => {
+    const newStops = [...stops];
+    newStops[index] = value;
+    setStops(newStops);
+  };
+
+  const addStop = () => {
+    setStops([...stops, '']);
+  };
+
+  const removeStop = (index) => {
+    const newStops = stops.filter((_, i) => i !== index);
+    setStops(newStops);
+  };
+
+  const handleReverse = () => {
+    const temp = origin;
+    setOrigin(destination);
+    setDestination(temp);
+  };
 
   const handleClick = () => {
     setLoading(true);
     setResult(null);
     setError('');
 
-    fetch(`http://localhost:8080/route?origin=${origin}&destination=${destination}`)
+    const waypoints = stops.filter(stop => stop.trim() !== '').join('|');
+    let url = `http://localhost:8080/route?origin=${origin}&destination=${destination}`;
+    if (waypoints) {
+      url += `&waypoints=${waypoints}`;
+    }
+
+    fetch(url)
       .then(res => res.json())
       .then(data => {
         if (data.content.startsWith('Error') || data.content.startsWith('No routes')) {
@@ -34,15 +62,28 @@ function GreenRouteDemo() {
 
       <div>
         <label>Origin:</label>
-        <input value={origin} onChange={e => setOrigin(e.target.value)} placeholder="e.g., San Francisco, CA"/>
+        <input value={origin} onChange={e => setOrigin(e.target.value)} placeholder="e.g., Kuala Lumpur"/>
       </div>
+
+      <button onClick={handleReverse} style={{ margin: '10px 0' }}>Reverse</button>
 
       <div>
         <label>Destination:</label>
-        <input value={destination} onChange={e => setDestination(e.target.value)} placeholder="e.g., Los Angeles, CA"/>
+        <input value={destination} onChange={e => setDestination(e.target.value)} placeholder="e.g., Johor Bahru"/>
       </div>
 
-      <button onClick={handleClick} disabled={loading}>
+      <div>
+        <label>Stops:</label>
+        {stops.map((stop, index) => (
+          <div key={index}>
+            <input value={stop} onChange={e => handleStopChange(index, e.target.value)} placeholder={`Stop ${index + 1}`}/>
+            <button onClick={() => removeStop(index)} style={{ marginLeft: '10px' }}>Remove</button>
+          </div>
+        ))}
+        <button onClick={addStop} style={{ marginTop: '10px' }}>Add Stop</button>
+      </div>
+
+      <button onClick={handleClick} disabled={loading} style={{ marginTop: '20px' }}>
         {loading ? 'Finding Route...' : 'Get Green Route'}
       </button>
 
