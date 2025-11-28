@@ -8,5 +8,8 @@
     "backend": "cd backend && mvnw.cmd spring-boot:run",
     "dev": "npm start"
   },
-  "dependencies": {}
+  "dependencies": {
+    "leaflet": "^1.9.4",
+    "react-leaflet": "^5.0.0"
+  }
 }

@@ -21,12 +21,14 @@ public class DirectionsService {
                 .connectTimeout(5, TimeUnit.SECONDS)
                 .readTimeout(5, TimeUnit.SECONDS)
                 .build();
+
         DirectionsResult result = DirectionsApi.newRequest(context)
                 .origin(origin)
                 .destination(destination)
                 .mode(TravelMode.DRIVING)
-                .alternatives(true) // Request alternative routes
+                .alternatives(true)
                 .await();
+
         context.shutdown();
         return result;
     }

@@ -1,52 +1,54 @@
 package com.example.backend.route;
 
-import com.google.maps.model.DirectionsResult;
 import com.google.maps.model.DirectionsLeg;
+import com.google.maps.model.DirectionsResult;
+import com.google.maps.model.DirectionsStep;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
+@RequestMapping("/route")
 public class RouteController {
 
-    private final DirectionsService directionsService;
-    private final GreenRouteService greenRouteService;
-    private long counter = 0;
-
-    // Average fuel efficiency in kilometers per liter.
-    private static final double AVERAGE_FUEL_EFFICIENCY_KMPL = 12.0;
-
     @Autowired
-    public RouteController(DirectionsService directionsService, GreenRouteService greenRouteService) {
-        this.directionsService = directionsService;
-        this.greenRouteService = greenRouteService;
-    }
+    private DirectionsService directionsService;
 
-    @GetMapping("/route")
-    public Route route(@RequestParam(value = "origin") String origin,
-                       @RequestParam(value = "destination") String destination) {
-        counter++;
+    @GetMapping
+    public RouteResponse getRoute(@RequestParam String origin, @RequestParam String destination) {
         try {
-            DirectionsResult directionsResult = directionsService.getDirections(origin, destination);
-            DirectionsResult greenRoute = greenRouteService.getGreenRoute(directionsResult);
-            if (greenRoute.routes != null && greenRoute.routes.length > 0) {
-                DirectionsLeg leg = greenRoute.routes[0].legs[0];
-                String distance = leg.distance.humanReadable;
-                String duration = leg.duration.humanReadable;
+            DirectionsResult directions = directionsService.getDirections(origin, destination);
 
-                // Calculate fuel used
-                double distanceInKm = leg.distance.inMeters / 1000.0;
-                double fuelUsedInLiters = distanceInKm / AVERAGE_FUEL_EFFICIENCY_KMPL;
-                String fuelUsed = String.format("Approx. %.1f liters", fuelUsedInLiters);
-
-                return new Route(counter, greenRoute.routes[0].summary, distance, duration, fuelUsed);
-            } else {
-                return new Route(counter, "No routes found.", "", "", "");
+            if (directions.routes.length == 0) {
+                RouteResponse error = new RouteResponse();
+                error.setContent("No routes found");
+                return error;
             }
+
+            var route = directions.routes[0]; // first route
+            List<RouteResponse.LatLng> coords = new ArrayList<>();
+            for (DirectionsLeg leg : route.legs) {
+                for (DirectionsStep step : leg.steps) {
+                    coords.add(new RouteResponse.LatLng(step.startLocation.lat, step.startLocation.lng));
+                }
+                coords.add(new RouteResponse.LatLng(leg.endLocation.lat, leg.endLocation.lng));
+            }
+
+            RouteResponse response = new RouteResponse();
+            response.setContent("Route via " + route.summary);
+            response.setDistance(route.legs[0].distance.humanReadable);
+            response.setDuration(route.legs[0].duration.humanReadable);
+            response.setFuelUsed("Estimated fuel: " + Math.round(route.legs[0].distance.inMeters / 1000 * 0.07) + " L");
+            response.setCoordinates(coords);
+
+            return response;
+
         } catch (Exception e) {
-            e.printStackTrace();
-            return new Route(counter, "Error while fetching directions.", "", "", "");
+            RouteResponse error = new RouteResponse();
+            error.setContent("Error fetching directions: " + e.getMessage());
+            return error;
         }
     }
 }
