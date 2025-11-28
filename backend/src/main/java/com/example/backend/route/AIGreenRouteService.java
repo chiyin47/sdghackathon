@@ -62,32 +62,38 @@ public class AIGreenRouteService {
                     distanceMeters, durationSeconds);
 
             String aiResponse = aiModelService.getAIResponse(prompt);
+            System.out.println("Raw AI Response for route " + routeNumber + ":\n" + aiResponse);
 
-            String fuelPrediction = "Fuel prediction unavailable"; // Default to a descriptive message
-            double parsedFuel = Double.MAX_VALUE; // Initialize with a high value, meaning prediction is not parsed or unavailable
+            String fuelPrediction;
+            double parsedFuel;
 
-            String efficiencyClassification = "N/A";
-            String drivingRecommendation = "No specific recommendation.";
-            String peakHoursAdvice = "No specific peak hour advice.";
-            String fullPredictionSummary = "No AI prediction available."; // This is here, but before the others
-
-            // Parse AI response
+            // Attempt to parse AI response for fuel prediction
+            boolean aiFuelParsedSuccessfully = false;
             if (aiResponse != null && !aiResponse.isEmpty()) {
-                // Extract Fuel
                 Pattern fuelPattern = Pattern.compile("Fuel: ([\\d.]+) liters");
                 Matcher fuelMatcher = fuelPattern.matcher(aiResponse);
                 if (fuelMatcher.find()) {
                     String fuelValueStr = fuelMatcher.group(1);
                     try {
                         parsedFuel = Double.parseDouble(fuelValueStr);
-                        fuelPrediction = fuelValueStr + " liters"; // Only set if successfully parsed
+                        fuelPrediction = String.format("%.2f liters", parsedFuel);
+                        aiFuelParsedSuccessfully = true;
                     } catch (NumberFormatException e) {
-                        System.err.println("Failed to parse fuel prediction from AI response: '" + fuelValueStr + "' for route " + routeNumber);
-                        // parsedFuel remains Double.MAX_VALUE, fuelPrediction remains "Fuel prediction unavailable"
+                        System.err.println("Failed to parse AI fuel prediction: '" + fuelValueStr + "' for route " + routeNumber + ". Resorting to rough estimation. " + e.getMessage());
                     }
                 } else {
-                    System.err.println("AI response did not contain expected 'Fuel: X liters' pattern for route " + routeNumber + ". Response: " + aiResponse.substring(0, Math.min(aiResponse.length(), 200)) + "...");
+                    System.err.println("AI response did not contain expected 'Fuel: X liters' pattern for route " + routeNumber + ". Resorting to rough estimation. Response snippet: " + aiResponse.substring(0, Math.min(aiResponse.length(), 200)) + "...");
                 }
+            }
+
+            // If AI fuel prediction failed or was not found, use a rough estimation
+            if (!aiFuelParsedSuccessfully) {
+                // Rough estimation: 0.08 liters per km + 0.0005 liters per second of duration (for idling/traffic)
+                // This is a very rough heuristic to ensure a numeric value is always present.
+                parsedFuel = (distanceMeters / 1000.0) * 0.08 + (durationSeconds * 0.0005);
+                fuelPrediction = String.format("Estimated: %.2f liters", parsedFuel);
+                System.out.println("Using rough fuel estimation for route " + routeNumber + ": " + fuelPrediction);
+            }
 
                 // Extract Efficiency
                 Pattern efficiencyPattern = Pattern.compile("Efficiency: (.+)");
@@ -113,6 +119,17 @@ public class AIGreenRouteService {
                 Matcher peakHoursMatcher = peakHoursPattern.matcher(aiResponse);
                 if (peakHoursMatcher.find()) {
                     peakHoursAdvice = peakHoursMatcher.group(1).trim();
+                }
+
+                // Fallback for AI-provided efficiency, recommendation, and peak hour advice if not parsed
+                if (efficiencyClassification.equals("N/A")) {
+                    efficiencyClassification = "Not explicitly classified by AI, based on fuel: " + (parsedFuel < 5.0 ? "Efficient" : (parsedFuel < 10.0 ? "Average" : "Less Efficient"));
+                }
+                if (drivingRecommendation.equals("No specific recommendation.")) {
+                    drivingRecommendation = "General advice: Drive smoothly, avoid rapid acceleration/braking, maintain consistent speed. Check tire pressure regularly.";
+                }
+                if (peakHoursAdvice.equals("No specific peak hour advice.")) {
+                    peakHoursAdvice = "General peak hour strategy: Consider leaving earlier/later, use real-time traffic apps, and explore less congested alternative routes.";
                 }
 
                 // Construct full prediction summary for display
