@@ -8,6 +8,7 @@ import com.google.maps.model.TravelMode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -27,7 +28,8 @@ public class DirectionsService {
                 .origin(origin)
                 .destination(destination)
                 .mode(TravelMode.DRIVING)
-                .alternatives(true);
+                .alternatives(true)
+                .departureTime(Instant.now());
 
         if (waypoints != null && waypoints.length > 0) {
             request.waypoints(waypoints);

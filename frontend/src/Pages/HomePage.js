@@ -1,7 +1,15 @@
 import React from 'react';
+import Chatbot from '../Chatbot';
+import './HomePage.css';
 
 function HomePage() {
-  return <h2>Home Page</h2>;
+  return (
+    <div className="home-page">
+      <h1>Welcome to Your Routing Application</h1>
+      <p>Plan your trips efficiently. Your AI assistant is here to help!</p>
+      <Chatbot />
+    </div>
+  );
 }
 
 export default HomePage;
