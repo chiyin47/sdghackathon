@@ -13,44 +13,42 @@ function GreenRouteDemo() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const truncateText = (text, maxLength) => {
-    if (!text) return '';
-    return text.length <= maxLength ? text : text.substring(0, maxLength) + '...';
-  };
+  const truncateText = (text, maxLength) =>
+    !text ? '' : text.length <= maxLength ? text : text.substring(0, maxLength) + '...';
 
   const generateWazeUrl = (route) => {
-    if (!route || !route.coordinates || route.coordinates.length === 0) return '';
-    const destinationLatLng = route.coordinates[route.coordinates.length - 1];
-    return `waze://?ll=${destinationLatLng.lat},${destinationLatLng.lng}&navigate=yes`;
+    if (!route?.coordinates?.length) return '';
+    const dest = route.coordinates.at(-1);
+    return `waze://?ll=${dest.lat},${dest.lng}&navigate=yes`;
   };
 
   const generateGoogleMapsUrl = (route) => {
-    if (!route || !route.coordinates || route.coordinates.length === 0) return '';
+    if (!route?.coordinates?.length) return '';
 
     const originLatLng = route.coordinates[0];
-    const destinationLatLng = route.coordinates[route.coordinates.length - 1];
+    const destLatLng = route.coordinates.at(-1);
 
     let waypointsParam = '';
-    if (route.waypoints && route.waypoints.length > 0) {
-      waypointsParam = '&waypoints=' + route.waypoints.map(wp => `${wp.lat},${wp.lng}`).join('|');
+    if (route.waypoints?.length > 0) {
+      waypointsParam =
+        '&waypoints=' + route.waypoints.map(wp => `${wp.lat},${wp.lng}`).join('|');
     }
 
-    return `https://www.google.com/maps/dir/?api=1&origin=${originLatLng.lat},${originLatLng.lng}&destination=${destinationLatLng.lat},${destinationLatLng.lng}${waypointsParam}`;
+    return `https://www.google.com/maps/dir/?api=1&origin=${originLatLng.lat},${originLatLng.lng}&destination=${destLatLng.lat},${destLatLng.lng}${waypointsParam}`;
   };
 
   const handleStopChange = (index, value) => {
-    const newStops = [...stops];
-    newStops[index] = value;
-    setStops(newStops);
+    const updated = [...stops];
+    updated[index] = value;
+    setStops(updated);
   };
 
   const addStop = () => setStops([...stops, '']);
   const removeStop = (index) => setStops(stops.filter((_, i) => i !== index));
 
   const handleReverse = () => {
-    const temp = origin;
     setOrigin(destination);
-    setDestination(temp);
+    setDestination(origin);
   };
 
   const handleKeyPress = (e) => {
@@ -63,16 +61,16 @@ function GreenRouteDemo() {
     setSelectedRoute(null);
     setError('');
 
-    const waypoints = stops.filter(stop => stop.trim() !== '').join('|');
+    const waypoints = stops.filter(s => s.trim() !== '').join('|');
+
     let url = `http://localhost:8080/route?origin=${origin}&destination=${destination}`;
     if (waypoints) url += `&waypoints=${waypoints}`;
 
     fetch(url)
       .then(res => res.json())
       .then(data => {
-        console.log("Data received from backend:", data);
-        if (data && Array.isArray(data) && data.length > 0) {
-          if (data.length === 1 && data[0].content && data[0].content.startsWith('Error')) {
+        if (data?.length > 0) {
+          if (data.length === 1 && data[0].content?.startsWith('Error')) {
             setError(data[0].content);
           } else {
             setRoutes(data);
@@ -87,82 +85,134 @@ function GreenRouteDemo() {
   };
 
   return (
-    <div className='style'>
-      <div className='font'>Green Route Demo</div>
-      <div className='desc'>
-        <p>Find the shortest route by distance to save fuel and get AI predictions.</p>
+    <div className="style">
+
+      {/* ===========================
+          HEADER HERO SECTION
+      ============================ */}
+      <div className="hero-header">
+        <img src="/logo.png" alt="EcoRoute Logo" className="hero-logo" />
+
+        <nav className="hero-nav">
+          <a href="/">Home</a>
+          <a href="/how">How it works</a>
+          <a href="/eco">EcoRouter</a>
+          <a href="/about">About us</a>
+        </nav>
+
+        <h1 className="font">Green Route Finder</h1>
+        <p className="desc">
+          Discover eco-friendly routes that save fuel, reduce emissions, and get AI-powered
+          insights for smarter travel decisions.
+        </p>
       </div>
-      
+
+      {/* ===========================
+           MAIN CONTENT
+      ============================ */}
       <div className="main-content-container">
+
+        {/* LEFT PANEL — Plan Your Journey */}
         <div className="input-panel">
-          <div className='origin'>
-            <label>Origin:</label>
+
+          <h3 style={{ marginTop: 0, marginBottom: '20px', fontWeight: 700, color: '#2c3e50' }}>
+            Plan Your Journey
+          </h3>
+
+          {/* ORIGIN */}
+          <div className="origin">
+            <label>Starting Point</label>
             <div className="input-card">
               <AutocompleteInput
                 value={origin}
                 onChange={setOrigin}
                 onKeyDown={handleKeyPress}
-                placeholder="Enter origin location..."
+                placeholder="Enter your origin location..."
               />
             </div>
           </div>
 
-          <div className='reverse-addstop-container'>
-            <button onClick={handleReverse}>Reverse</button>
+          {/* Reverse + Add Stop */}
+          <div className="reverse-addstop-container">
+            <button onClick={handleReverse}>Swap</button>
             <button onClick={addStop}>Add Stop</button>
           </div>
 
-          <div className='destination'>
-            <label>Destination:</label>
+          {/* DESTINATION */}
+          <div className="destination">
+            <label>Destination</label>
             <div className="input-card">
               <AutocompleteInput
                 value={destination}
                 onChange={setDestination}
                 onKeyDown={handleKeyPress}
-                placeholder="Enter destination location..."
+                placeholder="Enter your destination location..."
               />
             </div>
           </div>
 
-          <div className='stops-container'>
-            <label>Stops:</label>
-            {stops.map((stop, index) => (
-              <div className="input-card" key={index}>
+          {/* STOPS */}
+          <div className="stops-container">
+            <label>Stops</label>
+            {stops.map((stop, i) => (
+              <div className="input-card" key={i}>
                 <AutocompleteInput
                   value={stop}
-                  onChange={value => handleStopChange(index, value)}
+                  onChange={(val) => handleStopChange(i, val)}
                   onKeyDown={handleKeyPress}
-                  placeholder={`Stop ${index + 1}`}
+                  placeholder={`Stop ${i + 1}`}
                 />
-                <button onClick={() => removeStop(index)}>Remove</button>
+                <button onClick={() => removeStop(i)}>Remove</button>
               </div>
             ))}
           </div>
 
+          {/* Submit */}
           <button onClick={handleClick} disabled={loading}>
-            {loading ? 'Finding Route...' : 'Get Green Routes'}
+            {loading ? 'Finding Route...' : 'Find Green Routes'}
           </button>
 
-          {error && <div className='error-message'>{error}</div>}
+          {error && <div className="error-message">{error}</div>}
         </div>
 
+        {/* RIGHT PANEL — Map + Routes */}
         <div className="display-panel">
-          <div className='map-routes-container'>
-            <div className='map-container'>
+
+          <div className="map-routes-container">
+
+            {/* Map */}
+            <div className="map-container">
               {selectedRoute ? (
                 <MapComponent route={selectedRoute} />
               ) : (
-                <div>Map will appear here after fetching a route</div>
+                <div
+                  style={{
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#999'
+                  }}
+                >
+                  <div style={{ fontSize: '70px' }}>📍</div>
+                  <p>Your route map will appear here</p>
+                  <small>Enter origin and destination to get started</small>
+                </div>
               )}
             </div>
 
+            {/* Routes list */}
             {routes.length > 0 && (
-              <div className='routes-list'>
+              <div className="routes-list">
                 <h3>Alternative Routes</h3>
-                {routes.map(route => (
+
+                {routes.map((route) => (
                   <div
                     key={route.routeNumber}
-                    className={selectedRoute && selectedRoute.routeNumber === route.routeNumber ? 'selected' : ''}
+                    className={
+                      selectedRoute?.routeNumber === route.routeNumber ? 'selected' : ''
+                    }
                     onClick={() => setSelectedRoute(route)}
                   >
                     <h4>
@@ -177,34 +227,47 @@ function GreenRouteDemo() {
                             borderRadius: '50%',
                             display: 'inline-block'
                           }}
-                          title={`Efficiency: ${route.color}`}
                         ></span>
                       )}
                     </h4>
-                    <p>{route.distance} • {route.duration} • {route.fuelUsed}</p>
+                    <p>
+                      {route.distance} • {route.duration} • {route.fuelUsed}
+                    </p>
                   </div>
                 ))}
               </div>
             )}
           </div>
 
+          {/* Bottom section — Selected Route details */}
           {selectedRoute && (
-            <div className='selected-route-details'>
+            <div className="selected-route-details">
               <h3>Selected Route</h3>
-              
-              <CO2Calculator 
+
+              <CO2Calculator
                 distance={selectedRoute.distance}
                 duration={selectedRoute.duration}
                 fuelUsed={selectedRoute.fuelUsed}
               />
-              
-              <div className='ai-prediction'>
-                <p><strong>AI Insight:</strong> {truncateText(selectedRoute.fuelSavingPrediction, 300)}</p>
+
+              <div className="ai-prediction">
+                <p>
+                  <strong>AI Insight:</strong>{' '}
+                  {truncateText(selectedRoute.fuelSavingPrediction, 300)}
+                </p>
               </div>
-              
-              <div className='navigation-buttons'>
-                <button onClick={() => window.open(generateWazeUrl(selectedRoute), '_blank')} disabled={!selectedRoute}>Open in Waze</button>
-                <button onClick={() => window.open(generateGoogleMapsUrl(selectedRoute), '_blank')} disabled={!selectedRoute}>Open in Google Maps</button>
+
+              <div className="navigation-buttons">
+                <button
+                  onClick={() => window.open(generateWazeUrl(selectedRoute), '_blank')}
+                >
+                  Open in Waze
+                </button>
+                <button
+                  onClick={() => window.open(generateGoogleMapsUrl(selectedRoute), '_blank')}
+                >
+                  Open in Google Maps
+                </button>
               </div>
             </div>
           )}

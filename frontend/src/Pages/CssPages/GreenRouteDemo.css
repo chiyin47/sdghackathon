@@ -309,3 +309,125 @@ button[disabled] {
     padding: 15px;
   }
 }
+
+/* PAGE CONTAINER */
+.greenroute-container {
+  margin: 40px auto;
+  max-width: 1100px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* HEADER */
+.header-section {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.title {
+  font-size: 2.8rem;
+  font-weight: 700;
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  color: #555;
+  margin-top: 8px;
+}
+
+/* MAIN AREA: LEFT + RIGHT */
+.content-wrapper {
+  display: flex;
+  width: 100%;
+  gap: 40px;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+/* LEFT CARD */
+.journey-card {
+  width: 420px;
+  padding: 25px;
+  background: #f8f8f8;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.card-title {
+  font-size: 1.6rem;
+  margin-bottom: 20px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 15px;
+}
+
+.input-group label {
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.input-group input {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+/* TRANSPORT BUTTONS */
+.transport-row {
+  display: flex;
+  gap: 10px;
+  margin: 15px 0;
+}
+
+.transport-btn {
+  flex: 1;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #aaa;
+  background: #fff;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.transport-btn:hover {
+  background: #e8e8e8;
+}
+
+.find-route-btn {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 10px;
+  background: #4caf50;
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.find-route-btn:hover {
+  background: #43a047;
+}
+
+/* MAP PREVIEW */
+.map-preview {
+  flex-grow: 1;
+}
+
+.map-placeholder {
+  width: 100%;
+  height: 380px;
+  background: #e3e3e3;
+  border-radius: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #555;
+  font-size: 1.1rem;
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.1);
+}
