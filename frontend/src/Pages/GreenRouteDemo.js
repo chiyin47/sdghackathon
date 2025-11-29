@@ -91,14 +91,6 @@ function GreenRouteDemo() {
           HEADER HERO SECTION
       ============================ */}
       <div className="hero-header">
-        <img src="/logo.png" alt="EcoRoute Logo" className="hero-logo" />
-
-        <nav className="hero-nav">
-          <a href="/">Home</a>
-          <a href="/how">How it works</a>
-          <a href="/eco">EcoRouter</a>
-          <a href="/about">About us</a>
-        </nav>
 
         <h1 className="font">Green Route Finder</h1>
         <p className="desc">
