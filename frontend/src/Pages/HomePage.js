@@ -1,6 +1,7 @@
 import React from 'react';
 import Chatbot from './Chatbot';
 import './CssPages/HomePage.css';
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 
 function HomePage() {
   return (
@@ -20,8 +21,11 @@ function HomePage() {
           automatically reroute you around jams, cutting your commute time 
           and carbon footprint.
         </p>
-
-        <button className="get-started-btn">Get Started</button>
+        <Link to="/demo">
+        <button className="get-started-btn">
+          Get Started 
+         </button>
+         </Link>
       </div>
 
       {/* RIGHT HERO IMAGE */}
