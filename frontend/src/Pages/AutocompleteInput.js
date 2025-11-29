@@ -20,7 +20,7 @@ const AutocompleteInput = ({ value, onChange, onKeyDown, placeholder }) => {
             setSuggestions([]);
             return;
         }
-        fetch(`http://localhost:8080/places/autocomplete?input=${inputValue}`)
+        fetch(`https://sdghackathon-1-173683223586.asia-southeast1.run.app/places/autocomplete?input=${inputValue}`)
             .then(res => res.json())
             .then(data => {
                 setSuggestions(data);
