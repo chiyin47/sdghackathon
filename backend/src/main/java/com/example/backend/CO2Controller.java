@@ -14,7 +14,7 @@ import java.util.Map;
 public class CO2Controller {
 
     // Allow CORS for frontend running on another port
-    @CrossOrigin(origins = "http://localhost:3002")
+    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/calculate-co2")
     public Map<String, Double> calculateCO2(@RequestBody CO2Request request) {
         double emissionFactor = getEmissionFactor(request.getTransportType());
@@ -26,13 +26,48 @@ public class CO2Controller {
     }
 
     private double getEmissionFactor(String transportType) {
-        if (transportType == null) return 0;
+        if (transportType == null)
+            return 0;
         switch (transportType.toLowerCase()) {
-            case "car": return 0.192;
-            case "bus": return 0.105;
-            case "train": return 0.041;
-            case "plane": return 0.255;
-            default: return 0;
+            case "corolla":
+                return 0.14;
+            case "camry":
+                return 0.18;
+            case "myvi":
+                return 0.11;
+            case "honda city":
+                return 0.16;
+            case "city":
+                return 0.14;
+            case "focus":
+                return 0.15;
+            case "ranger":
+                return 0.22;
+            case "golf":
+                return 0.15;
+            case "persona":
+                return 0.13;
+            case "proton x70":
+                return 0.18;
+            case "nissan almera":
+                return 0.14;
+            case "nissan x-trail":
+                return 0.20;
+            case "mazda 3":
+                return 0.15;
+            case "mazda cx-5":
+                return 0.17;
+            case "bmw 3-series":
+                return 0.18;
+            case "mercedes c-class":
+                return 0.18;
+            case "picanto":
+                return 0.12;
+            case "sportage":
+                return 0.19;
+
+            default:
+                return 0;
         }
     }
 }

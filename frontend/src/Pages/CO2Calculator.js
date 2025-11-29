@@ -34,10 +34,24 @@ export default function CO2Calculator() {
       <form onSubmit={handleSubmit}>
         <label>Transport Type:</label>
         <select value={transportType} onChange={(e) => setTransportType(e.target.value)}>
-          <option value="car">Car</option>
-          <option value="bus">Bus</option>
-          <option value="train">Train</option>
-          <option value="plane">Plane</option>
+          <option value="corolla">Corolla</option>
+          <option value="camry">Camry</option>
+          <option value="myvi">Myvi</option>
+          <option value="honda city">Honda city</option>
+          <option value="city">City</option>
+          <option value="focus">Focus</option>
+          <option value="ranger">Ranger</option>
+          <option value="golf">Golf</option>
+          <option value="persona">Persona</option>
+          <option value="proton x70">Proton X70</option>
+          <option value="nissan almera">Nissan Almera</option>
+          <option value="nissan x-trail">Nissan X-Trail</option>
+          <option value="mazda 3">Mazda 3</option>
+          <option value="mazda cx-5">Mazda CX-5</option>
+          <option value="bmw 3-series">BMW 3-Series</option>
+          <option value="mercedes c-class">Mercedes C-Class</option>
+          <option value="picanto">Picanto</option>
+          <option value="sportage">Sportage</option>
         </select>
 
         <label>Distance (km):</label>
